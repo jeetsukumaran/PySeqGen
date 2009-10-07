@@ -308,7 +308,7 @@ class SeqGen(object):
                     format = "nexml"
                 dataset.write(open(output_filepath, "w"), format)                    
                     
-    def generate_dataset(self, input_string=None):       
+    def generate_dataset(self, input_string=None, dataset=None):       
         if not os.path.exists(self.seqgen_path):
             raise Exception('seq-gen not found at "%s"' % self.seqgen_path)                
         if input_string is None:
@@ -340,7 +340,8 @@ class SeqGen(object):
             if not self.quiet:    
                 print >>sys.stderr, "\nReading generated file ..."
                 
-            dataset = datasets.Dataset()
+            if dataset is None:
+                dataset = datasets.Dataset()
             dataset.read(open(output.name, "rU"), "nexus")
             return dataset
         
