@@ -1,0 +1,10 @@
+*.pyc
+*.kpf
+setup.cfg
+*.egg-info*
+.svn*
+.DS_Store*
+build/*
+dist/*
+setuptools-*.egg
+ez_setup.py
