@@ -204,7 +204,7 @@ class SeqGen(object):
             if isinstance(self.state_freqs, str):
                 args.append("-f%s" % self.state_freqs)
             else:
-                args.append("-f%s" % (",".join(self.state_freqs)))
+                args.append("-f%s" % (",".join([str(s) for s in self.state_freqs])))
             
         if self.ti_tv:
             args.append("-t%s" % self.ti_tv)
