@@ -28,15 +28,15 @@ ez_setup.use_setuptools()
 
 from setuptools import setup, find_packages, Extension
 
-setup(name = "pyseqgen", 
-      version = "1.00",
+setup(name = "pyseqgen",
+      version = "2.00",
       packages = find_packages(),
       author="Jeet Sukumaran and Mark T. Holder",
-      author_email='jeetsukumaran@gmail.com',      
-      maintainer = "Jeet Sukumaran and Mark T. Holder", 
-      maintainer_email = "jeetsukumaran@gmail.com mholder@ku.edu", 
+      author_email='jeetsukumaran@gmail.com',
+      maintainer = "Jeet Sukumaran and Mark T. Holder",
+      maintainer_email = "jeetsukumaran@gmail.com mholder@ku.edu",
       description = "Wrapper around Seq-Gen",
-      license='LGPL 3+',      
+      license='LGPL 3+',
       install_requires=[
           "DendroPy >= 2.5.0",
       ],
