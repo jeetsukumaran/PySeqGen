@@ -441,7 +441,7 @@ if __name__ == "__main__":
 #     source_dataset = dataio.dataset_from_file(tree_filepath, format=format_desc)
     try:
         source_dataset = dendropy.DataSet()
-        source_dataset.read(open(tree_filepath, "rU"), format=format_desc)
+        source_dataset.read(open(tree_filepath, "rU"), schema=format_desc)
     except Exception, e:
         print >>sys.stderr, e
         print >>sys.stderr, '"%s" is not a valid %s file' % (tree_filepath, format_desc)
