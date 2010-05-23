@@ -156,10 +156,10 @@ class SeqGen(object):
                     parts = '[%s]' % (','.join(parts))
                 else:
                     parts = ""
-                input.append("%s%s;" % (parts, tree.as_string(format="newick")))
+                input.append("%s%s;" % (parts, tree.as_string(schema="newick")))
             return '\n'.join(input)
         else:
-            return ";".join([t.as_string(format="newick") for t in self.trees]) + ";"
+            return ";".join([t.as_string(schema="newick") for t in self.trees]) + ";"
 #
 #     def compose_input_file(self, trees, num_sites=None, rel_rates=None):
 #         return StringIO.StringIO(self.compose_input_string(trees, num_sites, rel_rates))
@@ -279,7 +279,7 @@ class SeqGen(object):
                 input.flush()
                 output = open(output_filepath, "w")
                 args.append(input.name)
-                run = subprocess.Popen(args, stdin=None, stdout=output, stderr=subprocess.PIPE)
+                run = subprocess.Popen(args, shell=False, stdin=None, stdout=output, stderr=subprocess.PIPE)
                 stdout, stderr = run.communicate()
                 if stderr.upper().count("ERROR"):
                     sys.stderr.write("--- Seq-Gen ERROR DETECTED:\n")
@@ -303,14 +303,14 @@ class SeqGen(object):
                         index_offset = index_offset + 1
                         output_filepath = self.compose_output_filepath(rep+index_offset)
                 if self.output_nexus:
-                    format = "nexus"
+                    schema = "nexus"
                 else:
-                    format = "nexml"
-                dataset.write(open(output_filepath, "w"), format)
+                    schema = "nexml"
+                dataset.write(open(output_filepath, "w"), schema)
 
     def generate_dataset(self, input_string=None, dataset=None):
-        if not os.path.exists(self.seqgen_path):
-            raise Exception('seq-gen not found at "%s"' % self.seqgen_path)
+        #if not os.path.exists(self.seqgen_path):
+        #    raise Exception('seq-gen not found at "%s"' % self.seqgen_path)
         if input_string is None:
             input_string = self.compose_input_string()
         args=self.compose_arguments()
@@ -382,9 +382,9 @@ if __name__ == "__main__":
     parser.add_option_group(sim_optgroup)
 
     input_tree_optgroup = OptionGroup(parser, "Model Tree Options")
-    input_tree_optgroup.add_option('--from-nexus', default=None, dest='from_nexus', metavar='TREE-FILE', help="[DEFAULT] tree file in NEXUS format")
-    input_tree_optgroup.add_option('--from-newick', default=None, dest='from_newick', metavar='TREE-FILE', help="tree file in Newick format")
-    input_tree_optgroup.add_option('--from-nexml', default=None, dest='from_nexml', metavar='TREE-FILE', help="tree file in nexml format")
+    input_tree_optgroup.add_option('--from-nexus', default=None, dest='from_nexus', metavar='TREE-FILE', help="[DEFAULT] tree file in NEXUS schema")
+    input_tree_optgroup.add_option('--from-newick', default=None, dest='from_newick', metavar='TREE-FILE', help="tree file in Newick schema")
+    input_tree_optgroup.add_option('--from-nexml', default=None, dest='from_nexml', metavar='TREE-FILE', help="tree file in nexml schema")
     input_tree_optgroup.add_option('--scale-branches', default=None, dest='scale_branch_lens', metavar='SCALE-FACTOR', help="rescale branch lengths by SCALE-FACTOR")
     input_tree_optgroup.add_option('--scale-tree', default=None, dest='scale_tree_len', metavar='SCALE-FACTOR', help="rescale total tree length by SCALE-FACTOR")
     parser.add_option_group(input_tree_optgroup)
@@ -401,12 +401,12 @@ if __name__ == "__main__":
     parser.add_option_group(char_model_optgroup)
 
     output_optgroup = OptionGroup(parser, "Output Options")
-    default_to_format = 'SIMPLE-NEXUS'
+    default_to_schema = 'SIMPLE-NEXUS'
     output_optgroup.add_option('--output-directory', default='.', dest='output_dir', help='directory to store simulated dataset files (default=current)')
     output_optgroup.add_option('--output-prefix', default='data', dest='output_filename_prefix', help='common prefix for data files generated')
-    output_optgroup.add_option('--to-nexus', action='store_const', default=default_to_format, const='NEXUS', dest='to_format', help="[DEFAULT] saves the data in standard NEXUS format (will remove comments and advanced script blocks)")
-    output_optgroup.add_option('--to-simple-nexus', action='store_const', default=default_to_format, const='SIMPLE-NEXUS', dest='to_format', help="saves the data in the older NEXUS format, using a DATA block instead of TAXA/CHARACTER blocks")
-    output_optgroup.add_option('--to-nexml', action='store_const', default=default_to_format, const='NEXML', dest='to_format', help="saves the data in NEXML format")
+    output_optgroup.add_option('--to-nexus', action='store_const', default=default_to_schema, const='NEXUS', dest='to_schema', help="[DEFAULT] saves the data in standard NEXUS schema (will remove comments and advanced script blocks)")
+    output_optgroup.add_option('--to-simple-nexus', action='store_const', default=default_to_schema, const='SIMPLE-NEXUS', dest='to_schema', help="saves the data in the older NEXUS schema, using a DATA block instead of TAXA/CHARACTER blocks")
+    output_optgroup.add_option('--to-nexml', action='store_const', default=default_to_schema, const='NEXML', dest='to_schema', help="saves the data in NEXML schema")
     output_optgroup.add_option('--write-ancestral-seqs', action='store_true', dest='write_ancestral_seqs', default=False, help='write ancestral sequences')
     output_optgroup.add_option('--write-site-rates', action='store_true', dest='write_site_rates', default=False, help='write site rates')
     output_optgroup.add_option('--overwrite', action='store_true', default=False, dest='overwrite', help="overwrite files in destination directoy if already existing if false [Default = True]")
@@ -422,13 +422,13 @@ if __name__ == "__main__":
 
     if opts.from_nexus:
         tree_filepath = opts.from_nexus
-        format_desc = "NEXUS"
+        schema_desc = "NEXUS"
     elif opts.from_newick:
         tree_filepath = opts.from_newick
-        format_desc = "NEWICK"
+        schema_desc = "NEWICK"
     elif opts.from_nexml:
         tree_filepath = opts.from_nexml
-        format_desc = "NEXML"
+        schema_desc = "NEXML"
     else:
         print >>sys.stderr, "source of model tree(s) not specified"
         sys.exit(1)
@@ -438,13 +438,13 @@ if __name__ == "__main__":
         print >>sys.stderr, 'tree file "%s" not found' % tree_filepath
         sys.exit(1)
 
-#     source_dataset = dataio.dataset_from_file(tree_filepath, format=format_desc)
+#     source_dataset = dataio.dataset_from_file(tree_filepath, schema=schema_desc)
     try:
         source_dataset = dendropy.DataSet()
-        source_dataset.read(open(tree_filepath, "rU"), schema=format_desc)
+        source_dataset.read(open(tree_filepath, "rU"), schema=schema_desc)
     except Exception, e:
         print >>sys.stderr, e
-        print >>sys.stderr, '"%s" is not a valid %s file' % (tree_filepath, format_desc)
+        print >>sys.stderr, '"%s" is not a valid %s file' % (tree_filepath, schema_desc)
         raise e
 
     if source_dataset and len(source_dataset.tree_lists) > 0 and len(source_dataset.tree_lists[0]) > 0:
@@ -493,8 +493,8 @@ if __name__ == "__main__":
 
     seqgen.output_dir = os.path.expanduser(os.path.expandvars(opts.output_dir))
     seqgen.output_filename_prefix = os.path.expandvars(opts.output_filename_prefix)
-    seqgen.output_nexus = opts.to_format == 'NEXUS' or opts.to_format == 'SIMPLE-NEXUS'
-    seqgen.simple_nexus = opts.to_format == 'SIMPLE-NEXUS'
+    seqgen.output_nexus = opts.to_schema == 'NEXUS' or opts.to_schema == 'SIMPLE-NEXUS'
+    seqgen.simple_nexus = opts.to_schema == 'SIMPLE-NEXUS'
     seqgen.overwrite = opts.overwrite
 
     seqgen.generate_and_save_datasets()
