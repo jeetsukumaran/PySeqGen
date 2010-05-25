@@ -156,10 +156,10 @@ class SeqGen(object):
                     parts = '[%s]' % (','.join(parts))
                 else:
                     parts = ""
-                input.append("%s%s;" % (parts, tree.as_string(schema="newick")))
+                input.append("%s%s" % (parts, tree.as_string(schema="newick", write_rooting=False, internal_labels=False)))
             return '\n'.join(input)
         else:
-            return ";".join([t.as_string(schema="newick") for t in self.trees]) + ";"
+            return "".join([t.as_string(schema="newick", write_rooting=False, internal_labels=False) for t in self.trees])
 #
 #     def compose_input_file(self, trees, num_sites=None, rel_rates=None):
 #         return StringIO.StringIO(self.compose_input_string(trees, num_sites, rel_rates))
@@ -318,31 +318,27 @@ class SeqGen(object):
             print >>sys.stderr, ' '.join(args)
             #print >>sys.stderr, input_string
         if not self.dry_run:
-            input = tempfile.NamedTemporaryFile()
-#             input = open("zz.tre", "w")
-            input.write(input_string)
-            input.flush()
-            output = tempfile.NamedTemporaryFile()
-            args.append(input.name)
+            inputf = open('/tmp/input', 'w')
+            #inputf = tempfile.NamedTemporaryFile()
+            inputf.write(input_string)
+            inputf.flush()
+            outputf = open('/tmp/output', 'w')
+            #outputf = tempfile.NamedTemporaryFile()
+            args.append(inputf.name)
 
-#             print >>sys.stderr, ' '.join(args)
             run = subprocess.Popen(args,
                                    stdin=None,
-                                   stdout=output)
+                                   stdout=outputf)
             run.communicate()
 
             if not self.quiet:
                 print >>sys.stderr, "\n--(SEQ-GEN PROCESS EXITED WITH STATUS %d)--" % run.returncode
-#             x = open(output.name, "rU")
-#             print "*********************"
-#             print x.readlines()
-#             print "*********************"
             if not self.quiet:
                 print >>sys.stderr, "\nReading generated file ..."
 
             if dataset is None:
                 dataset = dendropy.DataSet()
-            dataset.read(open(output.name, "rU"), "nexus")
+            dataset.read(open(outputf.name, "rU"), "nexus")
             return dataset
 
 
