@@ -318,12 +318,12 @@ class SeqGen(object):
             print >>sys.stderr, ' '.join(args)
             #print >>sys.stderr, input_string
         if not self.dry_run:
-            inputf = open('/tmp/input', 'w')
-            #inputf = tempfile.NamedTemporaryFile()
+            #inputf = open('/tmp/input', 'w')
+            inputf = tempfile.NamedTemporaryFile()
             inputf.write(input_string)
             inputf.flush()
-            outputf = open('/tmp/output', 'w')
-            #outputf = tempfile.NamedTemporaryFile()
+            #outputf = open('/tmp/output', 'w')
+            outputf = tempfile.NamedTemporaryFile()
             args.append(inputf.name)
 
             run = subprocess.Popen(args,
