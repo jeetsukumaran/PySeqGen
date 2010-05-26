@@ -76,7 +76,6 @@ class SeqGen(object):
 
         # python object specific attributes
         self.seqgen_path = '/usr/local/bin/seq-gen'
-        self.num_replicates = 1
         self.rng_seed = None
         self.__rng = None
         self.trees = None
@@ -263,9 +262,9 @@ class SeqGen(object):
 
     def generate_nexus(self, output):
         """
-        Simulates data and writes to `output` in NEXUS format, where `output`
-        can either be a string specifying a filepath or file- or file-like
-        object opened for writing.
+        Simulates a single dataset and writes to `output` in NEXUS format,
+        where `output` can either be a string specifying a filepath or file- or
+        file-like object opened for writing.
         """
         input_string = self.compose_input_string()
         if not self.quiet and self.dump_tree:
@@ -289,25 +288,6 @@ class SeqGen(object):
                 sys.stderr.write("Failed input tree was:\n%s\n\n" % input_string)
             elif not self.quiet:
                 print >>sys.stderr, "--- Seq-Gen EXITED WITH STATUS CODE %d\n" % run.returncode
-
-    def generate_and_save_datasets(self):
-        index_offset = 1
-        input_string = self.compose_input_string()
-        if not self.quiet and self.dump_tree:
-            print >>sys.stderr, input_string
-        for rep in range(self.num_replicates):
-            dataset = self.generate_dataset(input_string=input_string)
-            if dataset:
-                output_filepath = self.compose_output_filepath(rep+index_offset)
-                if not self.overwrite:
-                    while os.path.exists(output_filepath):
-                        index_offset = index_offset + 1
-                        output_filepath = self.compose_output_filepath(rep+index_offset)
-                if self.output_nexus:
-                    schema = "nexus"
-                else:
-                    schema = "nexml"
-                dataset.write(open(output_filepath, "w"), schema)
 
     def generate_dataset(self, input_string=None, dataset=None):
         #if not os.path.exists(self.seqgen_path):
@@ -373,7 +353,6 @@ if __name__ == "__main__":
     sim_optgroup.add_option('--seq-len', action='store', dest='seq_len', default=None, metavar='SEQ-LEN', help='length of sequences')
     sim_optgroup.add_option('--num-partitions', action='store', dest='num_partitions', default=None, metavar='NUM-PARTS', help='number of data partitions')
     sim_optgroup.add_option('--ancestral-seq', action='store', dest='ancestral_seq', default=None, metavar='ANCESTRAL SEQUENCE', help='set ancestral character sequence')
-    sim_optgroup.add_option('--num-replicates', action='store', dest='num_replicates', default=1, metavar='NUM REPLICATES', help='number of independent datasets to generate')
     sim_optgroup.add_option('--quiet', action='store_true', dest='quiet', default=False, help='suppress progress messages')
     sim_optgroup.add_option('--dry-run', action='store_true', dest='dry_run', default=False, help='do not actually do anything')
     parser.add_option_group(sim_optgroup)
@@ -479,8 +458,6 @@ if __name__ == "__main__":
     seqgen.dry_run = opts.dry_run
     if opts.rng_seed:
         seqgen.rng_seed = long(opts.rng_seed)
-    if opts.num_replicates:
-        seqgen.num_replicates = long(opts.num_replicates)
     seqgen.seq_len = opts.seq_len
     seqgen.num_partitions = opts.num_partitions
     seqgen.ancestral_seq = opts.ancestral_seq
