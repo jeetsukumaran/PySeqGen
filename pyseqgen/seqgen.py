@@ -261,33 +261,34 @@ class SeqGen(object):
 #         if dataset.tree_lists:
 #             trees = dataset.tree_lists[0]
 
-    def generate_and_save_nexus(self):
-        index_offset = 1
-        if not os.path.exists(self.seqgen_path):
-            raise Exception('seq-gen not found at "%s"' % self.seqgen_path)
+    def generate_nexus(self, output):
+        """
+        Simulates data and writes to `output` in NEXUS format, where `output`
+        can either be a string specifying a filepath or file- or file-like
+        object opened for writing.
+        """
         input_string = self.compose_input_string()
         if not self.quiet and self.dump_tree:
             print >>sys.stderr, input_string
-        for rep in range(self.num_replicates):
-            output_filepath = self.compose_output_filepath(rep+index_offset)
-            args = self.compose_arguments()
-            if not self.quiet and self.dump_command:
-                print >>sys.stderr, "--- INVOKING Seq-Gen: %s" % (' '.join(args))
-            if not self.dry_run:
-                input = tempfile.NamedTemporaryFile()
-                input.write(input_string)
-                input.flush()
-                output = open(output_filepath, "w")
-                args.append(input.name)
-                run = subprocess.Popen(args, shell=False, stdin=None, stdout=output, stderr=subprocess.PIPE)
-                stdout, stderr = run.communicate()
-                if stderr.upper().count("ERROR"):
-                    sys.stderr.write("--- Seq-Gen ERROR DETECTED:\n")
-                    sys.stderr.write(stderr)
-                    sys.stderr.write("--- Seq-Gen EXITED WITH ERROR\n\n")
-                    sys.stderr.write("Failed input tree was:\n%s\n\n" % input_string)
-                elif not self.quiet:
-                    print >>sys.stderr, "--- Seq-Gen EXITED WITH STATUS CODE %d\n" % run.returncode
+        args = self.compose_arguments()
+        if not self.quiet and self.dump_command:
+            print >>sys.stderr, "--- INVOKING Seq-Gen: %s" % (' '.join(args))
+        if not self.dry_run:
+            input = tempfile.NamedTemporaryFile()
+            input.write(input_string)
+            input.flush()
+            if isinstance(output, str):
+                output = open(output, "w")
+            args.append(input.name)
+            run = subprocess.Popen(args, shell=False, stdin=None, stdout=output, stderr=subprocess.PIPE)
+            stdout, stderr = run.communicate()
+            if stderr.upper().count("ERROR"):
+                sys.stderr.write("--- Seq-Gen ERROR DETECTED:\n")
+                sys.stderr.write(stderr)
+                sys.stderr.write("--- Seq-Gen EXITED WITH ERROR\n\n")
+                sys.stderr.write("Failed input tree was:\n%s\n\n" % input_string)
+            elif not self.quiet:
+                print >>sys.stderr, "--- Seq-Gen EXITED WITH STATUS CODE %d\n" % run.returncode
 
     def generate_and_save_datasets(self):
         index_offset = 1
