@@ -24,7 +24,9 @@
 
 import subprocess
 import StringIO
+import uuid
 import tempfile
+import socket
 import random
 import os
 import sys
@@ -34,7 +36,13 @@ from optparse import OptionParser
 
 import dendropy
 
+HOSTNAME = socket.gethostname()
+PID = os.getpid()
+
 LONG_MAX = 2**32
+
+def get_tempfile(dir=None):
+    return tempfile.NamedTemporaryFile(dir=dir, prefix="abcsampler-{0}-{1}-{2}".format(HOSTNAME, PID, uuid.uuid4()))
 
 class SeqGen(object):
     """
@@ -273,7 +281,7 @@ class SeqGen(object):
         if not self.quiet and self.dump_command:
             print >>sys.stderr, "--- INVOKING Seq-Gen: %s" % (' '.join(args))
         if not self.dry_run:
-            input = tempfile.NamedTemporaryFile()
+            input = get_tempfile()
             input.write(input_string)
             input.flush()
             if isinstance(output, str):
@@ -300,11 +308,11 @@ class SeqGen(object):
             #print >>sys.stderr, input_string
         if not self.dry_run:
             #inputf = open('/tmp/input', 'w')
-            inputf = tempfile.NamedTemporaryFile()
+            inputf = get_tempfile()
             inputf.write(input_string)
             inputf.flush()
             #outputf = open('/tmp/output', 'w')
-            outputf = tempfile.NamedTemporaryFile()
+            outputf = get_tempfile()
             args.append(inputf.name)
 
             run = subprocess.Popen(args,
