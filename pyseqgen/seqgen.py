@@ -220,7 +220,7 @@ class SeqGen(object):
             if isinstance(self.general_rates, str):
                 args.append("-r%s" % self.general_rates)
             else:
-                args.append("-r%s" % (",".join(self.general_rates)))
+                args.append("-r%s" % (",".join([str(r) for r in self.general_rates])))
 
         if self.ancestral_seq:
             args.append("-k%s" % self.ancestral_seq)
