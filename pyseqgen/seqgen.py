@@ -327,7 +327,18 @@ class SeqGen(object):
 
             if dataset is None:
                 dataset = dendropy.DataSet()
-            dataset.read(open(outputf.name, "rU"), "nexus")
+            if self.trees is not None:
+                if hasattr(self.trees, "taxon_set"):
+                    taxon_set = self.tree.taxon_set
+                elif len(self.trees) > 0 and hasattr(self.trees[0], "taxon_set"):
+                    taxon_set = self.trees[0].taxon_set
+                else:
+                    taxon_set = None
+            else:
+                taxon_set = None
+            dataset.read(open(outputf.name, "rU"),
+                    "nexus",
+                    taxon_set=taxon_set)
             return dataset
 
 
